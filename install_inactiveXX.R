@@ -1,6 +1,8 @@
 # Install all packages needed to run inactiveXX pipeline
 # module bcftools must be loaded first (required to install gsl)
 
+# First run: module load apptainer/1.1.8 StdEnv/2020 gcc/9.3.0 bcftools/1.11 r/4.2.1
+
 r = getOption("repos")
 r["CRAN"] = "http://cran.us.r-project.org"
 options(repos = r)
@@ -440,7 +442,9 @@ if (! requireNamespace("gsl", quietly = TRUE)) {
   install.packages("gsl")
 }
 
-devtools::install_github('VanLoo-lab/ascat/ASCAT')
+# Optional package for alleleIntegrator (not needed for inactiveXX but needed
+# for one function in alleleIntegrator)
+#devtools::install_github('VanLoo-lab/ascat/ASCAT')
 
 devtools::install_github('constantAmateur/alleleIntegrator')
 

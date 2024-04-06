@@ -1,13 +1,9 @@
-# Functions to prepare data for the inactiveXX pipeline by downloading and 
-# aligning the fastq files
+# Third step: align fastq files that were downloaded from the HCA
 
-####### 1. Libraries #######
-require(data.table)
-require(dplyr)
-
-####### 2. Constants and File Paths#######
+####### Constants and File Paths#######
 # Cellranger
-nThreads <- 32
+nThreads <- 28
+localMem <- 200
 refGenome <- '/home/umaiyal1/scratch/refdata-gex-GRCh38-2020-A'
 
 # STARsolo script paths:
@@ -15,13 +11,14 @@ tenX <- '/home/umaiyal1/XCI-Meta-Analysis/star_scripts/10x.sh'
 dropSeq <- '/home/umaiyal1/XCI-Meta-Analysis/star_scripts/drop_seq.sh'
 inDrop <- '/home/umaiyal1/XCI-Meta-Analysis/star_scripts/in_drop.sh'
 
-####### 3. Functions ######
+####### Functions ######
 
 #' Create a mapped directory for one donor if those directories
 #' do not already exist
 #' 
 #' @param donorName the name of the donor the directories should be made for
-createMappedDirectory <- function(dataDir, donorName, group, useCellRanger=FALSE) {
+createMappedDirectory <- function(dataDir, donorName, group, 
+                                  useCellRanger=FALSE) {
   
   if (useCellRanger) {
     mappedDirectory <- file.path(dataDir, donorName, group)
@@ -83,7 +80,7 @@ runSTARsolo <- function(fastqDir, mappedDir, seqMethod) {
 
 #' Run cellranger on the fastq files for a group
 #'
-runCellRanger <- function(groupName, fastqPath, mappedDest) {
+runCellRanger <- function(groupName, fastqPath, mappedDest, useIntrons = FALSE) {
   # If the directory contains the 'outs' directory, assume cellranger has
   # finished running.
   if (doesOutsExist(file.path(mappedDest, 'mapped'))) {
@@ -92,8 +89,11 @@ runCellRanger <- function(groupName, fastqPath, mappedDest) {
   
   message(sprintf("Started mapping files at: %s", mappedDest))
   
-  cmd <- sprintf("cd %s && cellranger count --id=mapped --transcriptome=%s --fastqs=%s --sample=%s --expect-cells=300 --localcores=%s --localmem=128",
-                 mappedDest, refGenome, fastqPath, groupName, nThreads)
+  cmd <- sprintf("cd %s && cellranger count --id=mapped --transcriptome=%s --fastqs=%s --sample=%s --expect-cells=300 --localcores=%s --localmem=%s",
+                 mappedDest, refGenome, fastqPath, groupName, nThreads, localMem)
+  if (useIntrons) {
+    cmd <- paste0(cmd,' --include-introns')
+  }
   
   system(cmd)
   
