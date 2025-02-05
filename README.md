@@ -11,7 +11,7 @@
 8. `de_analysis.R` run differential expression analysis
 
 ## Other scripts
-1. `install_inactiveXX.R` includes most (if not all) packages needed to install inactiveXX on Compute Canada
+1. `install_inactiveXX.R` includes packages needed to install inactiveXX on Compute Canada
 
 ## Results
 1. supplementary tables: \
